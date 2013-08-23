@@ -53,20 +53,10 @@ sub output_ldif {
 			    casefold => 'lower',
 			    mbcescape => 1), "\n";
 	}
-	print
-	  map {
-	      my ($attr, $val) = @$_;
-	      $val =~ /^\s+/ or $val =~ /\s$/ or $val =~ /[^ -~]/ ?
-		"$attr:: " . encode_base64($val, '') . "\n" :
-		  "$attr: $val\n"
-	      } sort {
-		  join ("\0", @$a) cmp join ("\0", @$b)
-	      } map {
-		  my ($attr, $b64, $val) = (/^([^:]+)(::?) ?(.*)$/);
-		  $attr = lc $attr;
-		  $val = decode_base64 ($val) if $b64 eq '::';
-		  [$attr, $val]
-	      } @lines;
+	
+	for my $attr (sort { join ("\0", $a) cmp join ("\0", $b) } @lines) {
+		print $attr."\n";
+	}
 	print "\n";
     }
 }
